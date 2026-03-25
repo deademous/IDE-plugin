@@ -19,7 +19,6 @@ public class EmissionSearcher {
         List<PsiElement> targets = new ArrayList<>();
 
         PsiClass psiClass = uClass.getJavaPsi();
-        if (psiClass == null) return targets;
 
         Query<PsiReference> query =
                 ReferencesSearch.search(psiClass, GlobalSearchScope.projectScope(psiClass.getProject()));
