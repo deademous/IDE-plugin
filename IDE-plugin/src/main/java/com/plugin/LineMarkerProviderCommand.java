@@ -21,19 +21,27 @@ public class LineMarkerProviderCommand extends RelatedItemLineMarkerProvider {
 
         if (uClass == null || uClass.getName() == null) return;
 
-        if (uClass.getName().endsWith("Command")) {
+        boolean isCommand = uClass.getName().contains("Command") && uClass.isInterface();
+        if (isCommand) {
 
             PsiElement identifier = uClass.getJavaPsi().getNameIdentifier();
             if (identifier == null) identifier = element;
 
-            Collection<PsiElement> targets = EmissionSearcher.findEmission(uClass);
-
+            Collection<PsiElement> targetsEmission = EmissionSearcher.findEmission(uClass);
             NavigationGutterIconBuilder<PsiElement> builder =
                     NavigationGutterIconBuilder.create(AllIcons.Actions.Find)
-                            .setTargets(targets)
+                            .setTargets(targetsEmission)
                             .setTooltipText("Go to emission");
 
             result.add(builder.createLineMarkerInfo(identifier));
+
+           Collection<PsiElement> targetsProcessing = ProcessingSearcher.findProcessing(uClass);
+           NavigationGutterIconBuilder<PsiElement> processingBuilder =
+                   NavigationGutterIconBuilder.create(AllIcons.Actions.Execute)
+                                   .setTargets(targetsProcessing)
+                                           .setTooltipText("Go to processing");
+
+            result.add(processingBuilder.createLineMarkerInfo(identifier));
         }
     }
 }
