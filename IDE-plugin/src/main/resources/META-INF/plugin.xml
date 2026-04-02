@@ -34,8 +34,8 @@
                     icon="AllIcons.Toolwindows.ToolWindowPalette"/>
     </extensions>
     <actions>
-        <action id="ru.tbank.kotea.plugin.actions.GoToEmissionEventAction"
-                class="ru.tbank.kotea.plugin.actions.GoToEmissionEventAction" text="Go to emission">
+        <action id="com.plugin.GoToEmissionEventAction"
+                class="com.plugin.GoToEmissionEventAction" text="Go to emission">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
         </action>
     </actions>
