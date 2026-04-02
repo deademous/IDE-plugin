@@ -4,6 +4,7 @@ import com.intellij.codeInsight.navigation.NavigationUtil;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectFileIndex;
@@ -35,14 +36,6 @@ public class GoToEmissionEventAction extends AnAction {
         PsiElement target = anActionEvent.getData(PSI_ELEMENT);
 
         if (project == null || editor == null || target == null) return;
-
-        if (!(target instanceof KtClassOrObject ktClass)) return;
-
-        // filter only Event classes
-        if ((ktClass.getName() == null || !ktClass.getName().endsWith("Event")) &&
-                (ktClass.getSuperTypeList() == null || !ktClass.getSuperTypeList().getText().contains("Event"))) {
-            return;
-        }
 
         GlobalSearchScope searchScope = GlobalSearchScope.projectScope(project);
         ProjectFileIndex fileIndex = ProjectFileIndex.getInstance(project);
@@ -100,4 +93,23 @@ public class GoToEmissionEventAction extends AnAction {
         return ActionUpdateThread.BGT;
     }
 
+    @Override
+    public void update(@NotNull AnActionEvent e) {
+        e.getPresentation().setEnabledAndVisible(false);
+
+        Project project = e.getProject();
+        Editor editor = e.getData(EDITOR);
+        PsiElement target = e.getData(PSI_ELEMENT);
+
+        if (project == null || editor == null || target == null) return;
+
+        if (!(target instanceof KtClassOrObject ktClass)) return;
+
+        boolean isEventName = ktClass.getName() != null && ktClass.getName().endsWith("Event");
+        boolean isEventSuperType = ktClass.getSuperTypeList() != null && ktClass.getSuperTypeList().getText().contains("Event");
+
+        if (isEventName || isEventSuperType) {
+            e.getPresentation().setEnabledAndVisible(true);
+        }
+    }
 }
