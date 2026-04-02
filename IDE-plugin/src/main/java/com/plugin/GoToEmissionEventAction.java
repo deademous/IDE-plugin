@@ -1,8 +1,6 @@
 package com.plugin;
 
 import com.intellij.codeInsight.navigation.NavigationUtil;
-import com.intellij.pom.Navigatable;
-import com.intellij.psi.search.searches.ReferencesSearch.SearchParameters;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -10,10 +8,12 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.pom.Navigatable;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.ReferencesSearch;
+import com.intellij.psi.search.searches.ReferencesSearch.SearchParameters;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.kotlin.psi.KtClassOrObject;
@@ -23,7 +23,8 @@ import org.jetbrains.kotlin.psi.KtTypeReference;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.intellij.openapi.actionSystem.CommonDataKeys.*;
+import static com.intellij.openapi.actionSystem.CommonDataKeys.EDITOR;
+import static com.intellij.openapi.actionSystem.CommonDataKeys.PSI_ELEMENT;
 
 public class GoToEmissionEventAction extends AnAction {
 
@@ -35,8 +36,7 @@ public class GoToEmissionEventAction extends AnAction {
 
         if (project == null || editor == null || target == null) return;
 
-        if (!(target instanceof KtClassOrObject)) return;
-        KtClassOrObject ktClass = (KtClassOrObject) target;
+        if (!(target instanceof KtClassOrObject ktClass)) return;
 
         // filter only Event classes
         if ((ktClass.getName() == null || !ktClass.getName().endsWith("Event")) &&
