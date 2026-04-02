@@ -35,51 +35,9 @@ public class GoToEmissionEventAction extends AnAction {
         Editor editor = anActionEvent.getData(EDITOR);
         PsiElement target = anActionEvent.getData(PSI_ELEMENT);
 
-        if (project == null || editor == null || target == null) return;
+        if (project == null || editor == null || !(target instanceof KtClassOrObject ktClass)) return;
 
-        GlobalSearchScope searchScope = GlobalSearchScope.projectScope(project);
-        ProjectFileIndex fileIndex = ProjectFileIndex.getInstance(project);
-
-        SearchParameters params = new SearchParameters(target, searchScope, true);
-
-        List<PsiElement> emissionPlaces = new ArrayList<>();
-
-        // params of target and scope
-        for (PsiReference ref : ReferencesSearch.search(params).findAll()) {
-            PsiElement foundElement = ref.getElement();
-            VirtualFile file = foundElement.getContainingFile().getVirtualFile();
-
-            if (file == null) continue;
-
-            // find in source files only
-            if (!fileIndex.isInSource(file)) continue;
-
-            // exclude tests
-            if (fileIndex.isInTestSourceContent(file)) continue;
-            String filePath = file.getPath();
-            if (filePath.contains("/test/")) {
-                continue;
-            }
-
-            // exclude update
-            String fileName = file.getName();
-            if (fileName.contains("Update")) {
-                continue;
-            }
-
-            // exclude imports
-            if (PsiTreeUtil.getParentOfType(foundElement, KtImportDirective.class) != null) {
-                continue;
-            }
-
-            // exclude type ref
-            if (PsiTreeUtil.getParentOfType(foundElement, KtTypeReference.class) != null) {
-                continue;
-            }
-
-
-            emissionPlaces.add(foundElement);
-        }
+        List<PsiElement> emissionPlaces = EventEmissionSearcher.findEmissions(ktClass);
 
         // show the result
         if (emissionPlaces.size() == 1) {
