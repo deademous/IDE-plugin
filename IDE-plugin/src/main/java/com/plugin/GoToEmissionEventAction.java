@@ -15,6 +15,7 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.ReferencesSearch;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.kotlin.psi.KtClassOrObject;
 import org.jetbrains.kotlin.psi.KtImportDirective;
 import org.jetbrains.kotlin.psi.KtTypeReference;
 
@@ -32,6 +33,15 @@ public class GoToEmissionEventAction extends AnAction {
         PsiElement target = anActionEvent.getData(PSI_ELEMENT);
 
         if (project == null || editor == null || target == null) return;
+
+        if (!(target instanceof KtClassOrObject)) return;
+        KtClassOrObject ktClass = (KtClassOrObject) target;
+
+        // filter only Event classes
+        if ((ktClass.getName() == null || !ktClass.getName().endsWith("Event")) &&
+                (ktClass.getSuperTypeList() == null || !ktClass.getSuperTypeList().getText().contains("Event"))) {
+            return;
+        }
 
         GlobalSearchScope searchScope = GlobalSearchScope.projectScope(project);
         ProjectFileIndex fileIndex = ProjectFileIndex.getInstance(project);
