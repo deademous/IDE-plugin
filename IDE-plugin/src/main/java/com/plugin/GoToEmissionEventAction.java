@@ -111,6 +111,11 @@ public class GoToEmissionEventAction extends AnAction {
 
         if (!(target instanceof KtClassOrObject ktClass)) return;
 
+        String className = ktClass.getName();
+        if (className == null) return;
+
+        if (className.endsWith("Update")) return;
+
         boolean isEventName = ktClass.getName() != null && ktClass.getName().endsWith("Event");
         boolean isEventSuperType = ktClass.getSuperTypeList() != null && ktClass.getSuperTypeList().getText().contains("Event");
 
