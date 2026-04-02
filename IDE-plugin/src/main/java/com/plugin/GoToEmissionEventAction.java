@@ -13,7 +13,9 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.ReferencesSearch;
+import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.kotlin.psi.KtImportDirective;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +55,12 @@ public class GoToEmissionEventAction extends AnAction {
             if (filePath.contains("/test/")) {
                 continue;
             }
+
+            // exclude imports
+            if (PsiTreeUtil.getParentOfType(foundElement, KtImportDirective.class) != null) {
+                continue;
+            }
+
 
             emissionPlaces.add(foundElement);
         }
