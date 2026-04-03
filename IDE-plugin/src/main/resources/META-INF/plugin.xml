@@ -5,7 +5,7 @@
 
     <!-- Public plugin name should be written in Title Case.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/best-practices-for-listing.html#plugin-name -->
-    <name>IDE-plugin</name>
+    <name>IDE-plugi</name>
 
     <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
     <vendor url="https://www.yourcompany.com">YourCompany</vendor>
@@ -21,12 +21,31 @@
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
 
     <depends>com.intellij.java</depends>
-    <depends>org.jetbrains.kotlin</depends>
+    <depends>com.intellij.modules.platform</depends>
+
     <resource-bundle>messages.MyMessageBundle</resource-bundle>
     <!-- Extensions defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow id="MyToolWindow" factoryClass="org.example.ideplugin.MyToolWindowFactory"
-                    icon="AllIcons.Toolwindows.ToolWindowPalette"/>
+        <codeInsight.lineMarkerProvider
+                language="kotlin"
+                implementationClass="com.plugin.LineMarkerProviderCommand"/>
     </extensions>
+
+    <actions>
+        <group id = "Navigation" text = "Navigation" popup="true" icon="AllIcons.Actions.Search">
+            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+            <action id="Emission"
+                    class="com.plugin.EmissionAction"
+                    text="Go to Emission">
+                <keyboard-shortcut first-keystroke="control alt M" keymap="$default"/>
+            </action>
+
+            <action id="Processing"
+                    class="com.plugin.ProcessingAction"
+                    text="Go to Processing">
+                <keyboard-shortcut first-keystroke="control alt K" keymap="$default"/>
+            </action>
+        </group>
+    </actions>
 </idea-plugin>

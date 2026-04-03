@@ -1,8 +1,5 @@
 package com.plugin;
 
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.roots.ProjectFileIndex;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.ReferencesSearch;
@@ -15,20 +12,17 @@ import java.util.List;
 
 public class ProcessingSearcher {
 
-    public static Collection<PsiElement> findProcessing(@NotNull UClass uClass) {
-        List<PsiElement> targets = new ArrayList<>();
-        Project project = uClass.getJavaPsi().getProject();
-        PsiClass classCommand = uClass.getJavaPsi();
-        ProjectFileIndex fileIndex = ProjectFileIndex.getInstance(project);
+    public static List<PsiElement> findProcessing(@NotNull UClass uClass, GlobalSearchScope scope) {
+        if (!isCommand(uClass)) return null;
 
-        Collection<PsiReference> all_usage = ReferencesSearch.search(classCommand, GlobalSearchScope.projectScope(project))
+        List<PsiElement> targets = new ArrayList<>();
+        PsiClass classCommand = uClass.getJavaPsi();
+
+        Collection<PsiReference> all_usage = ReferencesSearch.search(classCommand, scope)
                 .findAll();
 
         for(PsiReference usage : all_usage) {
             PsiElement element = usage.getElement();
-            VirtualFile vFile = element.getContainingFile().getVirtualFile();
-
-            if (vFile != null && fileIndex.isInTestSourceContent(vFile)) continue;
 
             UElement uElement = UastContextKt.toUElement(element);
             if (uElement == null) continue;
@@ -70,11 +64,23 @@ public class ProcessingSearcher {
 
                         if (firstParam.isAssignableFrom(commandType)) return true;
                     }
-
                 }
             }
         }
 
+        return false;
+    }
+
+    private static boolean isCommand(UClass uClass) {
+        List<UTypeReferenceExpression> supers = uClass.getUastSuperTypes();
+
+        if (!supers.isEmpty()) {
+
+            UTypeReferenceExpression firstParent = supers.getFirst();
+            String parentName = firstParent.getType().getPresentableText();
+
+            return parentName.contains("Command");
+        }
         return false;
     }
 }
