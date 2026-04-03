@@ -33,6 +33,11 @@
         <toolWindow id="MyToolWindow" factoryClass="org.example.ideplugin.MyToolWindowFactory"
                     icon="AllIcons.Toolwindows.ToolWindowPalette"/>
     </extensions>
+    <extensions defaultExtensionNs="com.intellij">
+        <codeInsight.lineMarkerProvider
+                language="kotlin"
+                implementationClass="com.plugin.EmissionLineMarkerProvider"/>
+    </extensions>
     <actions>
         <action id="com.plugin.GoToEmissionEventAction"
                 class="com.plugin.GoToEmissionEventAction" text="Go to emission">

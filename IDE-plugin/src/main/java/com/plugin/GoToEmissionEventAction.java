@@ -70,12 +70,16 @@ public class GoToEmissionEventAction extends AnAction {
         if (!(target instanceof KtClassOrObject ktClass)) return;
 
         String className = ktClass.getName();
-        if (className == null) return;
+        if (className == null || className.endsWith("Update")) return;
 
-        if (className.endsWith("Update")) return;
+        boolean isEventName = className.endsWith("Event");
 
-        boolean isEventName = ktClass.getName() != null && ktClass.getName().endsWith("Event");
-        boolean isEventSuperType = ktClass.getSuperTypeList() != null && ktClass.getSuperTypeList().getText().contains("Event");
+        boolean isEventSuperType = false;
+        if (ktClass.getSuperTypeList() != null) {
+            String rawSuperTypes = ktClass.getSuperTypeList().getText();
+            String cleanSuperTypes = rawSuperTypes.replaceAll("<.*?>", "");
+            isEventSuperType = cleanSuperTypes.contains("Event");
+        }
 
         if (isEventName || isEventSuperType) {
             e.getPresentation().setEnabledAndVisible(true);
