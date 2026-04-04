@@ -1,8 +1,5 @@
 package com.plugin;
 
-import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
@@ -17,25 +14,22 @@ import org.jetbrains.kotlin.psi.KtTypeReference;
 import java.util.ArrayList;
 import java.util.List;
 
+public class EventProcessingSearcher {
 
-public class EventEmissionSearcher {
-    public static List<PsiElement> findEmissions(@NotNull KtClassOrObject target, @NotNull GlobalSearchScope scope) {
-        List<PsiElement> emissionPlaces = new ArrayList<>();
+    public static List<PsiElement> findProcessing(@NotNull KtClassOrObject target, @NotNull GlobalSearchScope scope) {
+        List<PsiElement> results = new ArrayList<>();
 
         for (PsiReference ref : ReferencesSearch.search(target, scope, false).findAll()) {
             PsiElement el = ref.getElement();
             VirtualFile file = el.getContainingFile().getVirtualFile();
-
             if (file == null || !scope.contains(file)) continue;
 
-            if (file.getName().contains("Update")) continue;
+            if (!file.getName().contains("Update")) continue;
 
             if (PsiTreeUtil.getParentOfType(el, KtImportDirective.class) != null) continue;
-            if (PsiTreeUtil.getParentOfType(el, KtTypeReference.class) != null) continue;
 
-
-            emissionPlaces.add(el);
+            results.add(el);
         }
-        return emissionPlaces;
+        return results;
     }
 }

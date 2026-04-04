@@ -36,29 +36,33 @@
     <extensions defaultExtensionNs="com.intellij">
         <codeInsight.lineMarkerProvider
                 language="kotlin"
-                implementationClass="com.plugin.EmissionLineMarkerProvider"/>
+                implementationClass="com.plugin.EventLineMarkerProvider"/>
     </extensions>
     <actions>
-
-        <action id="Kotea.Emission.Project"
-                class="com.plugin.ProjectEventEmissionAction"
-                text="Find Event Emission in Project">
+        <group id="Kotea.Events" text="Kotea Events" popup="true" icon="AllIcons.Nodes.Class">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
-            <keyboard-shortcut first-keystroke="control alt P" keymap="$default"/>
-        </action>
 
-        <action id="Kotea.Emission.Module"
-                class="com.plugin.ModuleEventEmissionAction"
-                text="Find Event Emission in Module">
-            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
-            <keyboard-shortcut first-keystroke="control alt M" keymap="$default"/>
-        </action>
+            <action id="Kotea.Emission.Project" class="com.plugin.ProjectEventEmissionAction" text="Find Emission (Project)">
+                <keyboard-shortcut first-keystroke="control alt P" keymap="$default"/>
+            </action>
+            <action id="Kotea.Emission.Module" class="com.plugin.ModuleEventEmissionAction" text="Find Emission (Module)">
+                <keyboard-shortcut first-keystroke="control alt M" keymap="$default"/>
+            </action>
+            <action id="Kotea.Emission.Test" class="com.plugin.TestEventEmissionAction" text="Find Emission (Test)">
+                <keyboard-shortcut first-keystroke="control alt M" keymap="$default"/>
+            </action>
 
-        <action id="Kotea.Emission.Test"
-                class="com.plugin.TestEventEmissionAction"
-                text="Find Event Emission in Test">
-            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
-            <keyboard-shortcut first-keystroke="control alt T" keymap="$default"/>
-        </action>
+            <separator/>
+
+            <action id="Kotea.Processing.Project" class="com.plugin.ProjectEventProcessingAction" text="Find Processing (Project)">
+                <keyboard-shortcut first-keystroke="control alt K" keymap="$default"/>
+            </action>
+            <action id="Kotea.Processing.Module" class="com.plugin.ModuleEventProcessingAction" text="Find Processing (Module)">
+                <keyboard-shortcut first-keystroke="control alt L" keymap="$default"/>
+            </action>
+            <action id="Kotea.Processing.Test" class="com.plugin.TestEventProcessingAction" text="Find Processing (Test)">
+                <keyboard-shortcut first-keystroke="control alt L" keymap="$default"/>
+            </action>
+        </group>
     </actions>
 </idea-plugin>
