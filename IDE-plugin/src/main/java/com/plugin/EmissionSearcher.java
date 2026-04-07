@@ -2,14 +2,13 @@ package com.plugin;
 
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiReference;
+
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.ReferencesSearch;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.uast.*;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class EmissionSearcher {

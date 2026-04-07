@@ -35,14 +35,17 @@ public class BaseAction extends AnAction {
         return "";
     }
 
+    private Map<String, GlobalSearchScope> scopeMap;
+
     private Map<String, GlobalSearchScope> buildScope(PsiElement e) {
-        Map<String, GlobalSearchScope> scope = new HashMap<>();
+        if (scopeMap != null) return scopeMap;
 
-        scope.put("Production", ScopeBuilder.getProductionScope(e));
-        scope.put("Test", ScopeBuilder.getTestScope(e));
-        scope.put("Module", ScopeBuilder.getModuleScope(e));
+        scopeMap = new HashMap<>();
+        scopeMap.put("Production", ScopeBuilder.getProductionScope(e));
+        scopeMap.put("Test", ScopeBuilder.getTestScope(e));
+        scopeMap.put("Module", ScopeBuilder.getModuleScope(e));
 
-        return scope;
+        return scopeMap;
     }
 
     private GlobalSearchScope getScope(PsiElement e, String name) {
