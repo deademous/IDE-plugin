@@ -22,6 +22,11 @@
 
     <depends>com.intellij.java</depends>
     <depends>com.intellij.modules.platform</depends>
+    <depends>org.jetbrains.kotlin</depends>
+
+    <extensions defaultExtensionNs="org.jetbrains.kotlin">
+        <supportsKotlinPluginMode supportsK2="true" />
+    </extensions>
 
     <resource-bundle>messages.MyMessageBundle</resource-bundle>
     <!-- Extensions defined by the plugin.
@@ -30,6 +35,9 @@
         <codeInsight.lineMarkerProvider
                 language="kotlin"
                 implementationClass="com.plugin.LineMarkerProviderCommand"/>
+        <codeInsight.lineMarkerProvider
+                language="kotlin"
+                implementationClass="com.plugin.EventLineMarkerProvider"/>
     </extensions>
 
     <actions>
@@ -47,36 +55,18 @@
                 <keyboard-shortcut first-keystroke="control alt K" keymap="$default"/>
             </action>
         </group>
-    </actions>
-    <extensions defaultExtensionNs="com.intellij">
-        <codeInsight.lineMarkerProvider
-                language="kotlin"
-                implementationClass="com.plugin.EventLineMarkerProvider"/>
-    </extensions>
-    <actions>
-        <group id="Kotea.Events" text="Kotea Events" popup="true" icon="AllIcons.Nodes.Class">
-            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        <group id = "Event.Navigation" text = "Event Navigation" popup="true" icon="AllIcons.Actions.Search">
+            <add-to-group group-id="EditorPopupMenu" anchor="after" relative-to-action="Navigation"/>
+            <action id="Event.Emission"
+                    class="com.plugin.EventEmissionAction"
+                    text="Go to Emission">
+                <keyboard-shortcut first-keystroke="control alt E" keymap="$default"/>
+            </action>
 
-            <action id="Kotea.Emission.Project" class="com.plugin.ProjectEventEmissionAction" text="Find Emission (Project)">
+            <action id="Event.Processing"
+                    class="com.plugin.EventProcessingAction"
+                    text="Go to Processing">
                 <keyboard-shortcut first-keystroke="control alt P" keymap="$default"/>
-            </action>
-            <action id="Kotea.Emission.Module" class="com.plugin.ModuleEventEmissionAction" text="Find Emission (Module)">
-                <keyboard-shortcut first-keystroke="control alt M" keymap="$default"/>
-            </action>
-            <action id="Kotea.Emission.Test" class="com.plugin.TestEventEmissionAction" text="Find Emission (Test)">
-                <keyboard-shortcut first-keystroke="control alt M" keymap="$default"/>
-            </action>
-
-            <separator/>
-
-            <action id="Kotea.Processing.Project" class="com.plugin.ProjectEventProcessingAction" text="Find Processing (Project)">
-                <keyboard-shortcut first-keystroke="control alt K" keymap="$default"/>
-            </action>
-            <action id="Kotea.Processing.Module" class="com.plugin.ModuleEventProcessingAction" text="Find Processing (Module)">
-                <keyboard-shortcut first-keystroke="control alt L" keymap="$default"/>
-            </action>
-            <action id="Kotea.Processing.Test" class="com.plugin.TestEventProcessingAction" text="Find Processing (Test)">
-                <keyboard-shortcut first-keystroke="control alt L" keymap="$default"/>
             </action>
         </group>
     </actions>
