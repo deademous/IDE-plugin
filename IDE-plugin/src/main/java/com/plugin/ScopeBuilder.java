@@ -8,6 +8,8 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.ProjectScopeBuilder;
+import org.bouncycastle.math.raw.Mod;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 public class ScopeBuilder {
@@ -17,7 +19,7 @@ public class ScopeBuilder {
 
         GlobalSearchScope baseScope = builder.buildContentScope();
 
-        return new GlobalSearchScope(project) {
+        return new GlobalSearchScope() {
             @Override
             public boolean isSearchInModuleContent(@NotNull Module module) {
                 return true;
@@ -39,7 +41,7 @@ public class ScopeBuilder {
         Project project = e.getProject();
         ProjectScopeBuilder builder = ProjectScopeBuilder.getInstance(project);
         GlobalSearchScope baseScope = builder.buildContentScope();
-        return new GlobalSearchScope(project) {
+        return new GlobalSearchScope() {
             @Override
             public boolean isSearchInModuleContent(@NotNull Module module) {
                 return true;
@@ -58,11 +60,10 @@ public class ScopeBuilder {
     }
 
     public static GlobalSearchScope getModuleScope(@NotNull PsiElement e) {
-        Project project = e.getProject();
         Module module = ModuleUtilCore.findModuleForPsiElement(e);
         GlobalSearchScope moduleScope = GlobalSearchScope.moduleScope(module);
 
-        return new GlobalSearchScope(project) {
+        return new GlobalSearchScope() {
             @Override
             public boolean isSearchInModuleContent(@NotNull Module _module) {
                 return _module.equals(module);
