@@ -1,12 +1,17 @@
 package com.plugin;
 
+import com.intellij.ide.util.PsiElementListCellRenderer;
 import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.util.NlsSafe;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.platform.backend.presentation.TargetPresentation;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import javax.swing.*;
 
 public class ContextPresentationProvider {
 
@@ -41,5 +46,30 @@ public class ContextPresentationProvider {
                 .locationText(loc)
                 .icon(file != null ? file.getIcon(0) : null)
                 .presentation();
+    }
+
+    public static ListCellRenderer<? super PsiElement> createCellRender() {
+        return new PsiElementListCellRenderer<>() {
+            @Override
+            public @NlsSafe String getElementText(PsiElement element) {
+                return getPresentation(element).getPresentableText();
+            }
+
+            @Override
+            protected @Nullable @NlsSafe String getContainerText(PsiElement element, String s) {
+                return getPresentation(element).getLocationText();
+            }
+
+            @Override
+            protected int getIconFlags() {
+                return 0;
+            }
+
+            @Override
+            protected Icon getIcon(PsiElement element) {
+                // Берем иконку из презентации
+                return getPresentation(element).getIcon();
+            }
+        };
     }
 }
