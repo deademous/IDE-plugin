@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class EmissionSearcher {
+public class CommandEmissionSearcher {
 
     public static List<PsiElement> findEmission(@NotNull UClass uClass, GlobalSearchScope scope) {
         Map<GlobalSearchScope, List<PsiElement>> scopeMap = CachedValuesManager.getCachedValue(uClass.getJavaPsi(),

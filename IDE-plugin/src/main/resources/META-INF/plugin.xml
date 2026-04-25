@@ -34,7 +34,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <codeInsight.lineMarkerProvider
                 language="kotlin"
-                implementationClass="com.plugin.LineMarkerProviderCommand"/>
+                implementationClass="com.plugin.CommandLineMarkerProvider"/>
         <codeInsight.lineMarkerProvider
                 language="kotlin"
                 implementationClass="com.plugin.EventLineMarkerProvider"/>
@@ -44,13 +44,13 @@
         <group id = "Navigation" text = "Command Navigation" popup="true" icon="AllIcons.Actions.Search">
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
             <action id="Emission"
-                    class="com.plugin.EmissionAction"
+                    class="com.plugin.CommandEmissionAction"
                     text="Go to Emission">
                 <keyboard-shortcut first-keystroke="control alt M" keymap="$default"/>
             </action>
 
             <action id="Processing"
-                    class="com.plugin.ProcessingAction"
+                    class="com.plugin.CommandProcessingAction"
                     text="Go to Processing">
                 <keyboard-shortcut first-keystroke="control alt K" keymap="$default"/>
             </action>

@@ -3,8 +3,6 @@ package com.plugin;
 import com.intellij.codeInsight.daemon.GutterIconNavigationHandler;
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerInfo;
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerProvider;
-import com.intellij.codeInsight.hint.HintManager;
-import com.intellij.icons.AllIcons;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.markup.GutterIconRenderer;
 import com.intellij.openapi.fileEditor.FileEditorManager;
@@ -14,7 +12,6 @@ import com.intellij.openapi.ui.popup.JBPopup;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.ui.popup.PopupStep;
 import com.intellij.openapi.ui.popup.util.BaseListPopupStep;
-import com.intellij.openapi.util.IconLoader;
 import com.intellij.pom.Navigatable;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
@@ -30,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 
-public class LineMarkerProviderCommand extends RelatedItemLineMarkerProvider {
+public class CommandLineMarkerProvider extends RelatedItemLineMarkerProvider {
 
     private Map<String, GlobalSearchScope> buildScope(PsiElement e) {
         Map<String, GlobalSearchScope> scopeMap = new HashMap<>();
@@ -69,10 +66,10 @@ public class LineMarkerProviderCommand extends RelatedItemLineMarkerProvider {
             PsiElement identifier = psiClass.getNameIdentifier();
             if (identifier == null) identifier = element;
 
-           RelatedItemLineMarkerInfo<PsiElement> emissionMarker = getMarker(identifier, psiClass, PluginIcons.EMISSION, " Go to Emission", EmissionSearcher::findEmission);
+           RelatedItemLineMarkerInfo<PsiElement> emissionMarker = getMarker(identifier, psiClass, PluginIcons.EMISSION, " Go to Emission", CommandEmissionSearcher::findEmission);
            result.add(emissionMarker);
 
-           RelatedItemLineMarkerInfo<PsiElement> processingMarker = getMarker(identifier, psiClass, PluginIcons.PROCESSING, "Go to Processing", ProcessingSearcher::findProcessing);
+           RelatedItemLineMarkerInfo<PsiElement> processingMarker = getMarker(identifier, psiClass, PluginIcons.PROCESSING, "Go to Processing", CommandProcessingSearcher::findProcessing);
            result.add(processingMarker);
         }
     }
@@ -86,7 +83,7 @@ public class LineMarkerProviderCommand extends RelatedItemLineMarkerProvider {
             if (constructedClass != null && isCommand(constructedClass)) {
                 UClass uCommand = UastContextKt.toUElement(constructedClass, UClass.class);
                 if (uCommand != null) {
-                    RelatedItemLineMarkerInfo<PsiElement> marker = getMarker(element, constructedClass, PluginIcons.PROCESSING, "Processing", ProcessingSearcher::findProcessing);
+                    RelatedItemLineMarkerInfo<PsiElement> marker = getMarker(element, constructedClass, PluginIcons.PROCESSING, "Processing", CommandProcessingSearcher::findProcessing);
                     result.add(marker);
                 }
             }
@@ -104,7 +101,7 @@ public class LineMarkerProviderCommand extends RelatedItemLineMarkerProvider {
                 if (call.getValueArguments().contains(uElement) || call.getValueArguments().contains(parent)) {
                     PsiElement res = ref.resolve();
                     if (res instanceof PsiClass psiClass && isCommand(psiClass)) {
-                        RelatedItemLineMarkerInfo<PsiElement> marker = getMarker(element, psiClass, PluginIcons.PROCESSING, "Processing", ProcessingSearcher::findProcessing);
+                        RelatedItemLineMarkerInfo<PsiElement> marker = getMarker(element, psiClass, PluginIcons.PROCESSING, "Processing", CommandProcessingSearcher::findProcessing);
                         result.add(marker);
                     }
                 }
@@ -126,7 +123,7 @@ public class LineMarkerProviderCommand extends RelatedItemLineMarkerProvider {
         if (!isCommandsHandler(uCommand, targetCommand)) return;
 
 
-        RelatedItemLineMarkerInfo<PsiElement> marker = getMarker(element, targetCommand, PluginIcons.EMISSION, "Emission", EmissionSearcher::findEmission);
+        RelatedItemLineMarkerInfo<PsiElement> marker = getMarker(element, targetCommand, PluginIcons.EMISSION, "Emission", CommandEmissionSearcher::findEmission);
 
         result.add(marker);
     }

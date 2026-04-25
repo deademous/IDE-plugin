@@ -12,7 +12,7 @@ import org.jetbrains.uast.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ProcessingSearcher {
+public class CommandProcessingSearcher {
 
     public static List<PsiElement> findProcessing(@NotNull UClass uClass, GlobalSearchScope scope) {
         Map<GlobalSearchScope, List<PsiElement>> scopeMap = CachedValuesManager.getCachedValue(uClass.getJavaPsi(),
