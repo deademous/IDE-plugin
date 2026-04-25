@@ -27,7 +27,7 @@ public class ProcessingSearcher {
 
     private static List<PsiElement> search(@NotNull UClass uClass, GlobalSearchScope scope) {
         List<PsiElement> targets = new ArrayList<>();
-        if (!isCommand(uClass)) return targets;
+//        if (!isCommand(uClass)) return targets;
         PsiClass classCommand = uClass.getJavaPsi();
 
         ReferencesSearch.search(classCommand, scope)

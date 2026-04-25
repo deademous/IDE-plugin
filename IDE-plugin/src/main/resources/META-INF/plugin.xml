@@ -41,7 +41,7 @@
     </extensions>
 
     <actions>
-        <group id = "Navigation" text = "Navigation" popup="true" icon="AllIcons.Actions.Search">
+        <group id = "Navigation" text = "Command Navigation" popup="true" icon="AllIcons.Actions.Search">
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
             <action id="Emission"
                     class="com.plugin.EmissionAction"

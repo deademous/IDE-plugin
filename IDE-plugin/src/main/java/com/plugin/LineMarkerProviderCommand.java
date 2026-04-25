@@ -69,10 +69,10 @@ public class LineMarkerProviderCommand extends RelatedItemLineMarkerProvider {
             PsiElement identifier = psiClass.getNameIdentifier();
             if (identifier == null) identifier = element;
 
-           RelatedItemLineMarkerInfo<PsiElement> emissionMarker = getMarker(identifier, psiClass, IconClass.goToEmission, " Go to Emission", EmissionSearcher::findEmission);
+           RelatedItemLineMarkerInfo<PsiElement> emissionMarker = getMarker(identifier, psiClass, PluginIcons.EMISSION, " Go to Emission", EmissionSearcher::findEmission);
            result.add(emissionMarker);
 
-           RelatedItemLineMarkerInfo<PsiElement> processingMarker = getMarker(identifier, psiClass, IconClass.goToProcessing, "Go to Processing", ProcessingSearcher::findProcessing);
+           RelatedItemLineMarkerInfo<PsiElement> processingMarker = getMarker(identifier, psiClass, PluginIcons.PROCESSING, "Go to Processing", ProcessingSearcher::findProcessing);
            result.add(processingMarker);
         }
     }
@@ -163,7 +163,7 @@ public class LineMarkerProviderCommand extends RelatedItemLineMarkerProvider {
                             UClass uClass = UastContextKt.toUElement(targetClass, UClass.class);
                             List<PsiElement> targets = searchFunc.apply(uClass, scope);
 
-                            createLog(title, element.getText(), selectedValue, targets.size());
+                            createLog(title, element.getText(), element.getProject().getName());
 
                             navigation(e, targets, title, point);
                         });
@@ -241,14 +241,11 @@ public class LineMarkerProviderCommand extends RelatedItemLineMarkerProvider {
         return false;
     }
 
-    private void createLog(String title, String className, String scope, int sizeSearch) {
+    private void createLog(String title, String className, String project) {
        AnalyticsService.log("gutter-icon", Map.of(
                 "type", "Command",
                 "feature", title,
-                "name", className,
-                "scope search", scope,
-                "size search", sizeSearch
+               "project", project
         ));
-        System.out.println("DEBUG: Trying to log event for " + className);
     }
 }

@@ -41,7 +41,7 @@ public class BaseAction extends AnAction {
     protected String getOperation() {
         return "";
     }
-    protected void createLog(String className, int sizeSearch) {}
+    protected void createLog(String project) {}
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
@@ -60,7 +60,7 @@ public class BaseAction extends AnAction {
     private void executeSearch(Editor e, PsiElement targetClass, GlobalSearchScope scope) {
         List<PsiElement> targets = findTargets(targetClass, scope);
 
-        createLog(targetClass.getText(), targets.size());
+        createLog(targetClass.getProject().getName());
 
         if (targets.isEmpty()) {
             String message = "No " + getOperation().toLowerCase() + " usages found.";

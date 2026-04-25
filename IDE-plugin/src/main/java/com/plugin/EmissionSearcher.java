@@ -30,7 +30,7 @@ public class EmissionSearcher {
 
     private static List<PsiElement> search(@NotNull UClass uClass, GlobalSearchScope scope) {
         List<PsiElement> targets = new ArrayList<>();
-        if (!isCommand(uClass)) return targets;
+//        if (!isCommand(uClass)) return targets;
 
         PsiClass psiClass = uClass.getJavaPsi();
 

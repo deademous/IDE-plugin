@@ -57,7 +57,7 @@ public class ContextPresentationProvider {
 
             @Override
             protected @Nullable @NlsSafe String getContainerText(PsiElement element, String s) {
-                return getPresentation(element).getLocationText();
+                return null;
             }
 
             @Override

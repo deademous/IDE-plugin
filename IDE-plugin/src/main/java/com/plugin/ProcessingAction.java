@@ -1,7 +1,9 @@
 package com.plugin;
 
+import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.uast.*;
 
 import java.util.List;
@@ -11,9 +13,8 @@ public class ProcessingAction extends BaseAction {
     @Override
     protected List<PsiElement> findTargets(PsiElement targetClass, GlobalSearchScope scope) {
         UClass uClass = UastContextKt.toUElement(targetClass, UClass.class);
-        if (uClass == null) {
-            return List.of();
-        }
+        if (uClass == null || !isCommand(uClass.getJavaPsi())) return List.of();
+
         return ProcessingSearcher.findProcessing(uClass, scope);
     }
 
@@ -28,12 +29,11 @@ public class ProcessingAction extends BaseAction {
     }
 
     @Override
-    protected void createLog(String className, int sizeSearch) {
+    protected void createLog(String project) {
         AnalyticsService.log("hot-key", Map.of(
                 "type", "Command",
                 "feature", "Go to Processing",
-                "name", className,
-                "size search", sizeSearch
+                "project", project
         ));
     }
 
@@ -50,5 +50,15 @@ public class ProcessingAction extends BaseAction {
         }
 
         return uClass != null ? uClass.getSourcePsi() : null;
+    }
+
+    private boolean isCommand(PsiClass psiClass) {
+        for (PsiClass superClass : psiClass.getSupers()) {
+            String name = superClass.getName();
+
+            if (name != null && name.contains("Command") && !name.contains("CommandsFlowHandler")) return true;
+        }
+
+        return false;
     }
 }

@@ -12,6 +12,8 @@ import javax.swing.Icon;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.markup.GutterIconRenderer;
 import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.ui.MessageType;
+import com.intellij.openapi.ui.popup.Balloon;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.ui.popup.PopupStep;
 import com.intellij.openapi.ui.popup.util.BaseListPopupStep;
@@ -103,7 +105,12 @@ public class EventLineMarkerProvider extends RelatedItemLineMarkerProvider {
                                 // навигация
 
                                 if (targets.isEmpty()) {
-                                    HintManager.getInstance().showInformationHint(editor, "No " + title.toLowerCase() + " found in " + selectedValue);
+//                                    HintManager.getInstance().showInformationHint(editor, "No " + title.toLowerCase() + " found in " + selectedValue);
+                                    JBPopupFactory.getInstance()
+                                            .createHtmlTextBalloonBuilder("Not found for " + title, MessageType.INFO, null)
+                                            .setFadeoutTime(3000) // Исчезнет через 3 секунды
+                                            .createBalloon()
+                                            .show(new RelativePoint(mouseEvent), Balloon.Position.atRight);
                                     return;
                                 }
 
@@ -114,13 +121,24 @@ public class EventLineMarkerProvider extends RelatedItemLineMarkerProvider {
                                             .presentationProvider(ContextPresentationProvider::getPresentation)
                                             .createPopup(elt.getProject(), "Go to " + title)
                                             .show(new RelativePoint(mouseEvent));
+
                                 }
+
+                                createLog("Go to " + title, element.getProject().getName());
                             });
                         }
                     }).show(new RelativePoint(mouseEvent));
         };
 
         return new RelatedItemLineMarkerInfo<>(element, element.getTextRange(), icon, elt -> "Go to " + title, navHandler,
-                GutterIconRenderer.Alignment.RIGHT, () -> List.of());
+                GutterIconRenderer.Alignment.CENTER, () -> List.of());
+    }
+
+    private void createLog(String title, String project) {
+        AnalyticsService.log("gutter-icon", Map.of(
+                "type", "Event",
+                "feature", title,
+                "project", project
+        ));
     }
 }
