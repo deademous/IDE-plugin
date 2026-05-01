@@ -29,20 +29,6 @@ import java.util.function.BiFunction;
 
 public class CommandLineMarkerProvider extends RelatedItemLineMarkerProvider {
 
-    private Map<String, GlobalSearchScope> buildScope(PsiElement e) {
-        Map<String, GlobalSearchScope> scopeMap = new HashMap<>();
-
-        scopeMap.put("Production", ScopeBuilder.getProductionScope(e));
-        scopeMap.put("Test", ScopeBuilder.getTestScope(e));
-        scopeMap.put("Module", ScopeBuilder.getModuleScope(e));
-
-        return scopeMap;
-    }
-
-    private GlobalSearchScope getScope(PsiElement e, String name) {
-        return buildScope(e).get(name);
-    }
-
     @Override
     protected void collectNavigationMarkers(@NotNull PsiElement element,
                                             @NotNull Collection<? super RelatedItemLineMarkerInfo<?>> result) {
@@ -133,7 +119,13 @@ public class CommandLineMarkerProvider extends RelatedItemLineMarkerProvider {
             Editor e = FileEditorManager.getInstance(element1.getProject()).getSelectedTextEditor();
             if (e != null) {
                 RelativePoint point = new RelativePoint(mouseEvent);
-                showScopePopup(e, targetCommand, element1, title, searchFunc, point);
+
+                UClass uClass = UastContextKt.toUElement(targetCommand, UClass.class);
+                List<PsiElement> targets = searchFunc.apply(uClass, ScopeBuilder.getModuleScope(element));
+
+                if (targets.isEmpty()) targets = searchFunc.apply(uClass, ScopeBuilder.getProductionScope(element));
+
+                navigation(e, targets, title, point);
             }
         });
 
@@ -148,30 +140,8 @@ public class CommandLineMarkerProvider extends RelatedItemLineMarkerProvider {
         );
     }
 
-    private void showScopePopup(Editor e, PsiElement targetClass, PsiElement element, String title, BiFunction<UClass, GlobalSearchScope, List<PsiElement>> searchFunc, RelativePoint point) {
-        String[] scopes = buildScope(element).keySet().toArray(new String[0]);
-
-        JBPopup popup = JBPopupFactory.getInstance()
-                .createListPopup(new BaseListPopupStep<String>("Select Search Scope for " + title , scopes) {
-                    @Override
-                    public @Nullable PopupStep<?> onChosen(String selectedValue, boolean finalChoice) {
-                        return doFinalStep(() -> {
-                            GlobalSearchScope scope = getScope(element, selectedValue);
-                            UClass uClass = UastContextKt.toUElement(targetClass, UClass.class);
-                            List<PsiElement> targets = searchFunc.apply(uClass, scope);
-
-                            createLog(title, element.getText(), element.getProject().getName());
-
-                            navigation(e, targets, title, point);
-                        });
-                    }
-                });
-        popup.show(point);
-    }
-
     private void navigation(Editor e, List<PsiElement> targets, String title, RelativePoint point) {
         if (targets.isEmpty()) {
-//            HintManager.getInstance().showInformationHint(e, "Not found for " + title);
             JBPopupFactory.getInstance()
                     .createHtmlTextBalloonBuilder("Not found for " + title, MessageType.INFO, null)
                     .setFadeoutTime(3000) // Исчезнет через 3 секунды
@@ -209,36 +179,30 @@ public class CommandLineMarkerProvider extends RelatedItemLineMarkerProvider {
         return false;
     }
 
-    private boolean isCommandsHandler(UClass uClass, PsiClass psiClass) {
-        PsiElementFactory factory = JavaPsiFacade.getElementFactory(psiClass.getProject());
-        PsiType commandType = factory.createType(psiClass);
+    private boolean isCommandsHandler(UClass handlerClass, PsiClass commandClass) {
+        PsiType commandType = JavaPsiFacade.getElementFactory(commandClass.getProject())
+                .createType(commandClass);
 
-        for (UTypeReferenceExpression interfaceRef : uClass.getUastSuperTypes()) {
-            PsiType type = interfaceRef.getType();
+        for (UTypeReferenceExpression superTypeRef : handlerClass.getUastSuperTypes()) {
 
-            if (type instanceof PsiClassType classType) {
-                PsiClassType.ClassResolveResult resolveResult = classType.resolveGenerics();
-                PsiClass iClass = resolveResult.getElement();
+            PsiType type = superTypeRef.getType();
+            if (!(type instanceof PsiClassType classType)) continue;
 
-                if (iClass != null && "CommandsFlowHandler".equals(iClass.getName())) {
+            PsiClass resolved = classType.resolve();
+            if (resolved == null || !"CommandsFlowHandler".equals(resolved.getName())) continue;
 
-                    PsiType[] params = classType.getParameters();
+            PsiType[] params = classType.getParameters();
+            if (params.length == 0) continue;
 
-                    if (params.length > 0) {
-                        PsiType firstParam = params[0];
+            PsiType firstParam = params[0];
 
-                        if (firstParam.isAssignableFrom(commandType)) {
-                            return true;
-                        }
-                    }
-                }
-            }
+            return firstParam.isAssignableFrom(commandType);
         }
 
         return false;
     }
 
-    private void createLog(String title, String className, String project) {
+    private void createLog(String title, String project) {
        AnalyticsService.log("gutter-icon", Map.of(
                 "type", "Command",
                 "feature", title,
