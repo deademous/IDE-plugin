@@ -125,6 +125,8 @@ public class CommandLineMarkerProvider extends RelatedItemLineMarkerProvider {
 
                 if (targets.isEmpty()) targets = searchFunc.apply(uClass, ScopeBuilder.getProductionScope(element));
 
+                createLog(title, element.getProject().getName());
+
                 navigation(e, targets, title, point);
             }
         });
