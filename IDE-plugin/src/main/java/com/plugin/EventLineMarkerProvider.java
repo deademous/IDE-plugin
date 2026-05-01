@@ -4,6 +4,8 @@ import com.intellij.codeInsight.daemon.GutterIconNavigationHandler;
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerInfo;
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerProvider;
 import com.intellij.codeInsight.navigation.PsiTargetNavigator;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.markup.GutterIconRenderer;
 import com.intellij.openapi.fileEditor.FileEditorManager;
@@ -73,34 +75,37 @@ public class EventLineMarkerProvider extends RelatedItemLineMarkerProvider {
             Editor editor = FileEditorManager.getInstance(elt.getProject()).getSelectedTextEditor();
             if (editor == null) return;
 
-            GlobalSearchScope moduleScope = ScopeBuilder.getModuleScope(elt);
-            List<PsiElement> targets = searchFunc.apply(targetClass, moduleScope);
+            ApplicationManager.getApplication().executeOnPooledThread(() -> {
+                List<PsiElement> targets = ReadAction.compute(() -> {
+                    List<PsiElement> res = searchFunc.apply(targetClass, ScopeBuilder.getModuleScope(elt));
+                    if (res == null || res.isEmpty()) {
+                        res = searchFunc.apply(targetClass, ScopeBuilder.getProductionScope(elt));
+                    }
+                    return res;
+                });
+                ApplicationManager.getApplication().invokeLater(() -> {
+                    createLog("Go to " + title, element.getProject().getName());
 
-            if (targets == null || targets.isEmpty()) {
-                GlobalSearchScope projectScope = ScopeBuilder.getProductionScope(elt);
-                targets = searchFunc.apply(targetClass, projectScope);
-            }
-            createLog("Go to " + title, element.getProject().getName());
+                    if (targets.isEmpty()) {
+                        JBPopupFactory.getInstance()
+                                .createHtmlTextBalloonBuilder("Not found for " + title, MessageType.INFO, null)
+                                .setFadeoutTime(3000) // Исчезнет через 3 секунды
+                                .createBalloon()
+                                .show(new RelativePoint(mouseEvent), Balloon.Position.atRight);
+                        return;
+                    }
 
-            if (targets.isEmpty()) {
-                JBPopupFactory.getInstance()
-                        .createHtmlTextBalloonBuilder("Not found for " + title, MessageType.INFO, null)
-                        .setFadeoutTime(3000) // Исчезнет через 3 секунды
-                        .createBalloon()
-                        .show(new RelativePoint(mouseEvent), Balloon.Position.atRight);
-                return;
-            }
+                    if (targets.size() == 1) {
+                        ((Navigatable) targets.getFirst()).navigate(true);
+                    } else {
+                        new PsiTargetNavigator<>(targets)
+                                .presentationProvider(ContextPresentationProvider::getPresentation)
+                                .createPopup(elt.getProject(), "Go to " + title)
+                                .show(new RelativePoint(mouseEvent));
 
-            if (targets.size() == 1) {
-                ((Navigatable) targets.getFirst()).navigate(true);
-            } else {
-                new PsiTargetNavigator<>(targets)
-                        .presentationProvider(ContextPresentationProvider::getPresentation)
-                        .createPopup(elt.getProject(), "Go to " + title)
-                        .show(new RelativePoint(mouseEvent));
-
-            }
-
+                    }
+                });
+            });
         };
 
         return new RelatedItemLineMarkerInfo<>(element, element.getTextRange(), icon, elt -> "Go to " + title, navHandler,
