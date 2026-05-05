@@ -1,96 +1,54 @@
-# IntelliJ Platform Plugin Template
+# KoTEA Companion Plugin
 
-[![Twitter Follow](https://img.shields.io/badge/follow-%40JBPlatform-1DA1F2?logo=twitter)](https://twitter.com/JBPlatform)
-[![Developers Forum](https://img.shields.io/badge/JetBrains%20Platform-Join-blue)][jb:forum]
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)]()
+[![Platform](https://img.shields.io/badge/platform-IntelliJ%20%7C%20Android%20Studio-green.svg)]()
 
-## Plugin template structure
+**IDE-plugin** is a native plugin for Android Studio (based on IDEA 2025.3 and higher). The tool is designed to simplify navigation and improve Developer Experience in projects using the KoTEA architectural pattern.
 
-A generated project contains the following content structure:
+## The Problem
 
-```
-.
-├── .run/                   Predefined Run/Debug Configurations
-├── build/                  Output build directory
-├── gradle
-│   ├── wrapper/            Gradle Wrapper
-├── src                     Plugin sources
-│   ├── main
-│   │   ├── kotlin/         Kotlin production sources
-│   │   └── resources/      Resources - plugin.xml, icons, messages
-├── .gitignore              Git ignoring rules
-├── build.gradle.kts        Gradle build configuration
-├── gradle.properties       Gradle configuration properties
-├── gradlew                 *nix Gradle Wrapper script
-├── gradlew.bat             Windows Gradle Wrapper script
-├── README.md               README
-└── settings.gradle.kts     Gradle project settings
-```
+The KoTEA library provides significant advantages when building the presentation layer, but its strictly decoupled architecture makes the code difficult to navigate. Business logic is split across different files:
+* The central `Update` entity (similar to a Reducer) processes events and dispatches commands.
+* `Event` and `Command` classes are scattered throughout the project.
 
-In addition to the configuration files, the most crucial part is the `src` directory, which contains our implementation and the manifest for our plugin – [plugin.xml][file:plugin.xml].
+Built-in IDE tools are insufficient to quickly check where a specific event was sent from or where a specific command is processed.
 
-> [!NOTE]
-> To use Java in your plugin, create the `/src/main/java` directory.
+## Key Features
 
-## Plugin configuration file
+The plugin creates a contextual bridge between the points of generation (Emission) and execution (Processing) of events and commands.
 
-The plugin configuration file is a [plugin.xml][file:plugin.xml] file located in the `src/main/resources/META-INF` directory.
-It provides general information about the plugin, its dependencies, extensions, and listeners.
+For each `Event` and `Command` class, 2 smart actions are available:
 
-You can read more about this file in the [Plugin Configuration File][docs:plugin.xml] section of our documentation.
+1.  **Go to emission:** Instantly opens the exact location where the event or command is dispatched (e.g., constructor calls). The search defaults to finding usages only in the `main` sourceSet, safely excluding test files for maximum relevance.
+2.  **Go to processing:** Navigates to the point of actual execution. For events, this is the `Update` class (specifically, `when` branches or private functions with a parameter of the required type). For commands, this is the nearest `CommandsFlowHandler` parameterized with the required type.
 
-If you're still not quite sure what this is all about, read our introduction: [What is the IntelliJ Platform?][docs:intro]
+###  Interactive Gutter Icons
+The plugin automatically places convenient markers in the editor's gutter:
+* **On declarations:** At the declaration site of an `Event` or `Command` both icons.
+* **On generation:** At constructor call sites, an icon appears allowing a quick jump to the processing logic (Go to processing).
+* **Inside Reducers:** Where an `Event` is used inside the `Update` class, a marker is displayed to quickly jump to the emission point (Go to emission).
+* **Inside Handlers:** In the `handle` method of a `CommandsFlowHandler` (specifically on `filterIsInstance` constructs), an icon appears to navigate to the command's invocation points.
 
-$H$H Predefined Run/Debug configurations
+*Tip: Hotkeys have also been added for all references to Event or Command types for blazing-fast navigation.*
 
-Within the default project structure, there is a `.run` directory provided containing predefined *Run/Debug configurations* that expose corresponding Gradle tasks:
+## Under the Hood
 
-| Configuration name | Description                                                                                                                                                                         |
-|--------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Run Plugin         | Runs [`:runIde`][gh:intellij-platform-gradle-plugin-runIde] IntelliJ Platform Gradle Plugin task. Use the *Debug* icon for plugin debugging.                                        |
-| Run Tests          | Runs [`:test`][gradle:lifecycle-tasks] Gradle task.                                                                                                                                 |
-| Run Verifications  | Runs [`:verifyPlugin`][gh:intellij-platform-gradle-plugin-verifyPlugin] IntelliJ Platform Gradle Plugin task to check the plugin compatibility against the specified IntelliJ IDEs. |
+* **Asynchronous Execution:** All heavy project tree searches are executed in a pool of background threads (`executeOnPooledThread`), ensuring the IDE interface no freezes.
+* **Smart Parsing (UAST & PSI):** The plugin avoids naive text searching. Instead, the analyzer relies on Abstract Syntax Trees, correctly resolving generics and handling Kotlin-specific features (like `object` singletons that lack constructor calls).
+* **Smart Caching:** By utilizing `CachedValuesManager`, navigation results are kept in memory. Repeated transitions happen instantly.
+* **Smart Scope:** The search prioritizes the local Gradle module and safely ignores test directories.
 
-> [!NOTE]
-> You can find the logs from the running task in the `idea.log` tab.
+##  Telemetry & Privacy
 
-## Publishing the plugin
+The plugin includes anonymous product analytics powered by PostHog to track UX metrics (e.g., the usage ratio between "Emission" and "Processing" actions).
+* Only depersonalized interaction events are collected.
+* Network requests are handled by a custom lightweight HttpClient.
 
-> [!TIP]
-> Make sure to follow all guidelines listed in [Publishing a Plugin][docs:publishing] to follow all recommended and required steps.
+##  Installation
 
-Releasing a plugin to [JetBrains Marketplace](https://plugins.jetbrains.com) is a straightforward operation that uses the `publishPlugin` Gradle task provided by the [intellij-platform-gradle-plugin][gh:intellij-platform-gradle-plugin-docs].
-
-You can also upload the plugin to the [JetBrains Plugin Repository](https://plugins.jetbrains.com/plugin/upload) manually via UI.
-
-## Useful links
-
-- [IntelliJ Platform SDK Plugin SDK][docs]
-- [IntelliJ Platform Gradle Plugin Documentation][gh:intellij-platform-gradle-plugin-docs]
-- [IntelliJ Platform Explorer][jb:ipe]
-- [JetBrains Marketplace Quality Guidelines][jb:quality-guidelines]
-- [IntelliJ Platform UI Guidelines][jb:ui-guidelines]
-- [JetBrains Marketplace Paid Plugins][jb:paid-plugins]
-- [IntelliJ SDK Code Samples][gh:code-samples]
-
-[docs]: https://plugins.jetbrains.com/docs/intellij
-[docs:intro]: https://plugins.jetbrains.com/docs/intellij/intellij-platform.html?from=IJPluginTemplate
-[docs:plugin.xml]: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html?from=IJPluginTemplate
-[docs:publishing]: https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html?from=IJPluginTemplate
-
-[file:plugin.xml]: ./src/main/resources/META-INF/plugin.xml
-
-[gh:code-samples]: https://github.com/JetBrains/intellij-sdk-code-samples
-[gh:intellij-platform-gradle-plugin]: https://github.com/JetBrains/intellij-platform-gradle-plugin
-[gh:intellij-platform-gradle-plugin-docs]: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html
-[gh:intellij-platform-gradle-plugin-runIde]: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-tasks.html#runIde
-[gh:intellij-platform-gradle-plugin-verifyPlugin]: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-tasks.html#verifyPlugin
-
-[gradle:lifecycle-tasks]: https://docs.gradle.org/current/userguide/java_plugin.html#lifecycle_tasks
-
-[jb:github]: https://github.com/JetBrains/.github/blob/main/profile/README.md
-[jb:forum]: https://platform.jetbrains.com/
-[jb:quality-guidelines]: https://plugins.jetbrains.com/docs/marketplace/quality-guidelines.html
-[jb:paid-plugins]: https://plugins.jetbrains.com/docs/marketplace/paid-plugins-marketplace.html
-[jb:quality-guidelines]: https://plugins.jetbrains.com/docs/marketplace/quality-guidelines.html
-[jb:ipe]: https://jb.gg/ipe
-[jb:ui-guidelines]: https://jetbrains.github.io/ui
+1. Download the latest `.zip` file from the Releases page.
+2. Open your IDE (Android Studio or IntelliJ IDEA).
+3. Navigate to **Settings / Preferences** > **Plugins**.
+4. Click the gear icon (⚙️) at the top and select **Install Plugin from Disk...**
+5. Choose the downloaded `.zip` archive and click **OK**.
+6. Restart your IDE to activate the plugin.
