@@ -22,7 +22,7 @@ For each `Event` and `Command` class, 2 smart actions are available:
 1.  **Go to emission:** Instantly opens the exact location where the event or command is dispatched (e.g., constructor calls). The search defaults to finding usages only in the `main` sourceSet, safely excluding test files for maximum relevance.
 2.  **Go to processing:** Navigates to the point of actual execution. For events, this is the `Update` class (specifically, `when` branches or private functions with a parameter of the required type). For commands, this is the nearest `CommandsFlowHandler` parameterized with the required type.
 
-###  Interactive Gutter Icons
+### Interactive Gutter Icons
 The plugin automatically places convenient markers in the editor's gutter:
 * **On declarations:** At the declaration site of an `Event` or `Command` both icons.
 * **On generation:** At constructor call sites, an icon appears allowing a quick jump to the processing logic (Go to processing).
@@ -38,13 +38,13 @@ The plugin automatically places convenient markers in the editor's gutter:
 * **Smart Caching:** By utilizing `CachedValuesManager`, navigation results are kept in memory. Repeated transitions happen instantly.
 * **Smart Scope:** The search prioritizes the local Gradle module and safely ignores test directories.
 
-##  Telemetry & Privacy
+## Telemetry & Privacy
 
 The plugin includes anonymous product analytics powered by PostHog to track UX metrics (e.g., the usage ratio between "Emission" and "Processing" actions).
 * Only depersonalized interaction events are collected.
 * Network requests are handled by a custom lightweight HttpClient.
 
-##  Installation
+## Installation
 
 1. Download the latest `.zip` file from the Releases page.
 2. Open your IDE (Android Studio or IntelliJ IDEA).
